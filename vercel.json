@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "env": {
+    "MONGO_URI": "mongodb+srv://sayangoswami780:4Y6wDGs6kcDyHNRW@cluster0.44wuc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    "JWT_SECRET": "0ad554cea69e29ef9db5a9c10f7e7bd0d215c019a9d44a0fb131e0c3a08c4c19276893ad4f1bb45dac1ca9e9a57d36cc149099f4bdd70f24ece12059ca8bdcfc"
+  }
+}

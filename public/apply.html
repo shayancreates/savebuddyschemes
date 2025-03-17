@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Bank Details</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+        }
+    </style>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-5">
+    <div id="navbar"></div>
+    <script>
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
+
+    <div class="max-w-lg mx-auto bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-bold text-center mb-4">Enter Your Bank Details</h2>
+
+        <input id="accountNumber" class="border p-2 w-full mb-3" placeholder="Account Number" />
+        <input id="cvv" class="border p-2 w-full mb-3" placeholder="CVV" />
+        <input id="expiryDate" class="border p-2 w-full mb-3" placeholder="Expiry Date" />
+
+        <button onclick="fetchBalance()"
+            class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">Fetch
+            Balance</button>
+
+        <p id="balanceDisplay" class="mt-4"></p>
+        <button onclick="goToForm()"
+            class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">Proceed</button>
+    </div>
+
+    <script>
+        function fetchBalance() {
+            document.getElementById("balanceDisplay").innerText = "Your Balance: ₹50,000";
+        }
+        function goToForm() {
+            window.location.href = "form.html";
+        }
+    </script>
+</body>
+
+</html>

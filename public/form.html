@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eligibility Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-5">
+    <div id="navbar"></div>
+    <script>
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
+    <div class="max-w-lg mx-auto bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-bold text-center mb-4">Check Your Eligibility</h2>
+
+        <label>Yearly Income (₹):</label>
+        <input id="income" type="number" class="border p-2 w-full mb-3" placeholder="Enter your yearly income" />
+
+        <button onclick="checkEligibility()"
+            class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">Check
+            Eligibility</button>
+
+        <p id="result" class="mt-4 text-center"></p>
+    </div>
+
+    <script>
+        function checkEligibility() {
+            let income = parseInt(document.getElementById("income").value);
+            let balance = 50000;
+            let eligible = income < 200000 && balance > 20000;
+
+            if (eligible) {
+                document.getElementById("result").innerText = " You are eligible! Redirecting...";
+                setTimeout(() => window.location.href = "micro-loans.html", 2000);
+            } else {
+                document.getElementById("result").innerText = "Sorry, you are not eligible.";
+            }
+        }
+    </script>
+</body>
+
+</html>

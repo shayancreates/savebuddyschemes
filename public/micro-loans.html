@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro Loans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body class="p-5">
+    <div id="navbar"></div>
+    <script>
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-3xl font-extrabold text-center mb-4">
+            <i class="fas fa-hand-holding-usd mr-2"></i>
+            Apply for Micro Loan
+        </h2>
+        <p class="text-center text-gray-600 mb-8">Get a small loan at the lowest interest rate.</p>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block font-bold mb-2">
+                    Your Full Name:
+                </label>
+                <input type="text" id="username" class="border p-3 w-full rounded-lg" placeholder="Enter your name"
+                    required>
+            </div>
+
+            <div>
+                <label class="block font-bold mb-2">
+                    Your User ID:
+                </label>
+                <input type="text" id="userId" class="border p-3 w-full rounded-lg bg-gray-100" readonly>
+            </div>
+
+            <div>
+                <label class="block font-bold mb-2">
+                    Select Loan Amount (₹):
+                </label>
+                <select id="loanAmount" class="border p-3 w-full rounded-lg">
+                    <option value="5000">₹5,000</option>
+                    <option value="10000">₹10,000</option>
+                    <option value="20000">₹20,000</option>
+                    <option value="50000">₹50,000</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-bold mb-2">
+                    Repayment Duration:
+                </label>
+                <select id="loanDuration" class="border p-3 w-full rounded-lg">
+                    <option value="6">6 Months</option>
+                    <option value="12">12 Months</option>
+                    <option value="24">24 Months</option>
+                </select>
+            </div>
+
+            <div id="interestCalculation" class="mt-6"></div>
+
+            <button onclick="applyForLoan()"
+                class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
+                <i class="fas fa-check-circle mr-2"></i>Apply Now
+            </button>
+
+            <p id="result" class="mt-4 text-center font-bold"></p>
+        </div>
+    </div>
+
+    <script>
+        // 📌 Generate a unique User ID on page load
+        function generateUserId() {
+            return "USR-" + Math.floor(Math.random() * 90000 + 10000); // Example: USR-12345
+        }
+
+        // 📌 Fill User ID field when page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("userId").value = generateUserId();
+        });
+
+        // 📌 Loan Application Function
+        async function applyForLoan() {
+            let name = document.getElementById("username").value.trim();
+            let userId = document.getElementById("userId").value.trim();
+            let loanAmount = parseInt(document.getElementById("loanAmount").value);
+            let loanDuration = parseInt(document.getElementById("loanDuration").value);
+
+            if (!name) {
+                document.getElementById("result").innerText = "❌ Please enter your name!";
+                return;
+            }
+
+            let loanData = { name, userId, loanAmount, loanDuration };
+
+            try {
+                let response = await fetch("http://localhost:5000/api/loans/apply", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(loanData)
+                });
+
+                let result = await response.json();
+                document.getElementById("result").innerText = result.message;
+            } catch (error) {
+                console.error("Error applying for loan:", error);
+                document.getElementById("result").innerText = "❌ Server Error!";
+            }
+        }
+
+        function calculateInterest() {
+            const amount = parseFloat(document.getElementById('loanAmount').value);
+            const duration = parseFloat(document.getElementById('loanDuration').value);
+            const interestRate = 5;
+
+            const interestAmount = (amount * interestRate * duration) / (12 * 100);
+            const totalAmount = amount + interestAmount;
+            const monthlyEMI = totalAmount / duration;
+
+            document.getElementById('interestCalculation').innerHTML = `
+                <div class="p-6 bg-gray-50 rounded-xl">
+                    <h3 class="text-xl font-extrabold mb-4">
+                        <i class="fas fa-calculator mr-2"></i>Loan Details:
+                    </h3>
+                    <div class="space-y-2">
+                        <p><span class="font-bold">Principal Amount:</span> ₹${amount.toFixed(2)}</p>
+                        <p><span class="font-bold">Interest Rate:</span> ${interestRate}% per annum</p>
+                        <p><span class="font-bold">Interest Amount:</span> ₹${interestAmount.toFixed(2)}</p>
+                        <p><span class="font-bold">Total Amount:</span> ₹${totalAmount.toFixed(2)}</p>
+                        <p><span class="font-bold">Monthly EMI:</span> ₹${monthlyEMI.toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add event listeners to amount and duration selects
+        document.getElementById('loanAmount').addEventListener('change', calculateInterest);
+        document.getElementById('loanDuration').addEventListener('change', calculateInterest);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body class="p-5">
+    <div id="navbar"></div>
+    <script>
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar').innerHTML = data);
+    </script>
+    <div class="max-w-4xl mx-auto">
+        <!-- Loans Section -->
+        <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
+            <h2 class="text-3xl font-extrabold text-gray-800 text-center mb-6">
+                <i class="fas fa-file-invoice-dollar mr-2"></i>My Loans
+            </h2>
+
+            <!-- User Input -->
+            <div class="mb-6">
+                <label class="block font-bold mb-2">
+                    <i class="fas fa-user mr-2"></i>Your Name:
+                </label>
+                <input type="text" id="username" class="border p-3 w-full mb-4 rounded-lg" placeholder="Enter your name"
+                    required>
+
+                <label class="block font-bold mb-2">
+                    <i class="fas fa-id-card mr-2"></i>Your Unique ID:
+                </label>
+                <input type="text" id="userId" class="border p-3 w-full mb-4 rounded-lg"
+                    placeholder="Enter your unique ID" required>
+
+                <button onclick="fetchUserLoans()"
+                    class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
+                    <i class="fas fa-search mr-2"></i>Fetch My Loans
+                </button>
+            </div>
+
+            <table class="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-3 font-extrabold">Amount</th>
+                        <th class="border p-3 font-extrabold">Duration</th>
+                        <th class="border p-3 font-extrabold">Interest</th>
+                        <th class="border p-3 font-extrabold">Interest Charged</th>
+                        <th class="border p-3 font-extrabold">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="userLoans"></tbody>
+            </table>
+        </div>
+
+        <!-- Bank Accounts Section -->
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-3xl font-extrabold text-gray-800 text-center mb-6">
+                <i class="fas fa-university mr-2"></i>My Bank Accounts
+            </h2>
+
+            <!-- Add New Account Form -->
+            <div class="mb-8 p-6 bg-gray-50 rounded-xl">
+                <h3 class="text-xl font-extrabold mb-4">
+                    <i class="fas fa-plus-circle mr-2"></i>Add New Account
+                </h3>
+                <input type="text" id="cardNumber" placeholder="Card Number" class="border p-3 w-full mb-3 rounded-lg">
+                <input type="text" id="cvv" placeholder="CVV" class="border p-3 w-full mb-3 rounded-lg">
+                <input type="text" id="expiryDate" placeholder="MM/YY" class="border p-3 w-full mb-3 rounded-lg">
+                <input type="number" id="initialBalance" placeholder="Initial Balance"
+                    class="border p-3 w-full mb-3 rounded-lg">
+                <button onclick="addBankAccount()"
+                    class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
+                    <i class="fas fa-plus mr-2"></i>Add Account
+                </button>
+            </div>
+
+            <!-- Bank Accounts List -->
+            <div id="bankAccountsList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchUserLoans() {
+            let userId = document.getElementById("userId").value.trim();
+            if (!userId) return alert("❌ Please enter your unique ID!");
+
+            try {
+                let response = await fetch(`http://localhost:5000/api/loans/user/${userId}`);
+                let loans = await response.json();
+
+                let tableBody = document.getElementById("userLoans");
+                tableBody.innerHTML = "";
+
+                if (loans.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-2">No loans found</td></tr>`;
+                    return;
+                }
+
+                loans.forEach(loan => {
+                    let row = `
+                        <tr class="border">
+                            <td class="border p-2">₹${loan.loanAmount}</td>
+                            <td class="border p-2">${loan.loanDuration} Months</td>
+                            <td class="border p-2">${loan.interestRate}%</td>
+                            <td class="border p-2">₹${loan.interestCharged.toFixed(2)}</td>
+                            <td class="border p-2">${loan.status}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error fetching loans:", error);
+            }
+        }
+
+        async function addBankAccount() {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cvv = document.getElementById('cvv').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const initialBalance = parseFloat(document.getElementById('initialBalance').value);
+            const userId = document.getElementById('userId').value;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/bank/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId,
+                        cardNumber,
+                        cvv,
+                        expiryDate,
+                        balance: initialBalance
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Bank account added successfully!');
+                    fetchBankAccounts();
+                }
+            } catch (error) {
+                console.error('Error adding bank account:', error);
+            }
+        }
+
+        async function fetchBankAccounts() {
+            const userId = document.getElementById('userId').value;
+            try {
+                const response = await fetch(`http://localhost:5000/api/bank/accounts/${userId}`);
+                const accounts = await response.json();
+
+                const accountsList = document.getElementById('bankAccountsList');
+                accountsList.innerHTML = accounts.map(account => `
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-credit-card text-2xl mr-3"></i>
+                            <div>
+                                <p class="font-extrabold">**** **** **** ${account.cardNumber.slice(-4)}</p>
+                                <p class="text-gray-600">Expires: ${account.expiryDate}</p>
+                            </div>
+                        </div>
+                        <p class="text-xl font-bold mb-4">Balance: ₹${account.balance.toFixed(2)}</p>
+                        <button onclick="setActiveAccount('${account._id}')" 
+                            class="w-full bg-black text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>Set as Active
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching accounts:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
